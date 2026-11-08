@@ -1,0 +1,46 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ps" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token" content="{{ csrf_token }}">
+<title>{% block title %}سوانح{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'sawanih/shell.css' %}">
+{% block css %}{% endblock %}
+</head>
+<body>
+{% block skip %}{% endblock %}
+<header class="topbar">
+  <a class="brand" href="{% url 'sawanih:dashboard' %}"><div class="brand-mark">س</div><span>د سوانحو مدیریت سیستم</span></a>
+  <div class="top-actions"><span class="role">{{ user.get_username }}</span><span>مرسته</span><a class="avatar" href="{% url 'admin:index' %}" style="text-decoration:none" aria-label="اداري برخه">ا</a></div>
+</header>
+<div class="layout">
+  <aside aria-label="اصلي مېنو">
+    <div class="menu-title">اصلي مېنو</div>
+    <a class="nav-link{% if active == 'home' %} active{% endif %}" href="{% url 'sawanih:dashboard' %}"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-text">کورپاڼه</span></a>
+    <a class="nav-link{% if active == 'add' %} active{% endif %}" href="{% url 'sawanih:person_new' %}"><span class="nav-icon" aria-hidden="true">＋</span><span class="nav-text">نوی شخص ثبت کړئ</span></a>
+    <a class="nav-link{% if active == 'reports' %} active{% endif %}" href="{% url 'sawanih:reports' %}"><span class="nav-icon" aria-hidden="true">📊</span><span class="nav-text">راپورونه</span></a>
+
+    {% comment %} ===== RE-ENABLE LATER: delete the comment / endcomment tags around this block to bring these menu links back. =====
+    <a class="nav-link" href="#education"><span class="nav-icon">🎓</span><span class="nav-text">د زده کړو معلومات</span></a>
+    <a class="nav-link" href="#cards"><span class="nav-icon">▣</span><span class="nav-text">د پېژندپاڼو مدیریت</span></a>
+    <a class="nav-link" href="#employment"><span class="nav-icon">🏢</span><span class="nav-text">د دندې او وظیفې معلومات</span></a>
+    <a class="nav-link" href="#documents"><span class="nav-icon">📁</span><span class="nav-text">اسناد او ضمیمې</span></a>
+    ===== {% endcomment %}
+
+    <div class="menu-title" style="margin-top:22px">سیستم</div>
+    <a class="nav-link" href="{% url 'admin:index' %}"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-text">د کاروونکو تنظیمات</span></a>
+  </aside>
+  {% block content %}{% endblock %}
+</div>
+
+<div class="toasts" aria-live="polite" id="toasts">
+  {% for m in messages %}<div class="toast {{ m.tags }}" role="status">{{ m }}</div>{% endfor %}
+</div>
+<script>
+// Show messages for 4 seconds, then fade them out.
+document.querySelectorAll('.toast').forEach(t=>setTimeout(()=>t.classList.add('hide'),4000));
+</script>
+{% block js %}{% endblock %}
+</body>
+</html>

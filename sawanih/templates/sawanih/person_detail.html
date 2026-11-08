@@ -1,0 +1,60 @@
+{% extends "sawanih/base.html" %}{% load static sawanih_extras %}
+{% block title %}{{ p.full_name }} | سوانح{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'sawanih/pages.css' %}">{% endblock %}
+{% block content %}
+<main>
+  <div class="head">
+    <div class="who">
+      <div class="avatar-lg">{% if p.photo %}<img src="{{ p.photo.url }}" alt="{{ p.full_name }}">{% else %}<span aria-hidden="true">👤</span>{% endif %}</div>
+      <div>
+        <h1>{{ p.full_name }}</h1>
+        <p class="sub">{{ p.job_title|default:"—" }}{% if p.organization %} — {{ p.organization }}{% endif %}</p>
+        <p style="margin:8px 0 0"><span class="badge {% if p.is_complete %}ok{% else %}warn{% endif %}">{% if p.is_complete %}بشپړ ریکارډ{% else %}نابشپړ ریکارډ{% endif %}</span></p>
+      </div>
+    </div>
+    <div class="head-actions no-print">
+      <a class="btn" href="{% url 'sawanih:dashboard' %}">بېرته لېست ته</a>
+      <a class="btn primary" href="{% url 'sawanih:person_edit' p.pk %}">سمول</a>
+      {% if perms.sawanih.delete_person %}<button type="button" class="btn danger" data-delete-url="{% url 'sawanih:api_person_item' p.pk %}" data-name="{{ p.full_name }}" data-after="{% url 'sawanih:dashboard' %}">ړنګول</button>{% endif %}
+      <button type="button" class="btn" onclick="window.print()">چاپ</button>
+    </div>
+  </div>
+
+  <section class="panel"><h2>شخصي معلومات</h2>
+    <dl class="info">
+      <div><dt>بشپړ نوم</dt><dd>{{ p.full_name }}</dd></div>
+      <div><dt>د پلار نوم</dt><dd>{{ p.father_name }}</dd></div>
+      <div><dt>د نیکه نوم</dt><dd>{{ p.grandfather_name|default:"—" }}</dd></div>
+      <div><dt>د زېږېدو نېټه</dt><dd>{{ p.date_of_birth|date:"Y-m-d"|pd }}</dd></div>
+      <div><dt>د تذکرې شمېره</dt><dd class="ltr">{{ p.id_number }}</dd></div>
+      <div><dt>تلیفون</dt><dd class="ltr">{{ p.phone }}</dd></div>
+      <div><dt>بریښنالیک</dt><dd class="ltr">{{ p.email|default:"—" }}</dd></div>
+      <div class="wide"><dt>پته</dt><dd>{{ p.address|default:"—"|linebreaksbr }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel"><h2>تحصیلي معلومات</h2>
+    <dl class="info">
+      <div><dt>درجه</dt><dd>{{ p.degree|default:"—" }}</dd></div>
+      <div><dt>موسسه</dt><dd>{{ p.institution|default:"—" }}</dd></div>
+      <div><dt>د فراغت کال</dt><dd>{% if p.graduation_year %}{{ p.graduation_year|pd }}{% else %}—{% endif %}</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel"><h2>دندې او وظیفې معلومات</h2>
+    <dl class="info">
+      <div><dt>اوسنۍ دنده</dt><dd>{{ p.job_title|default:"—" }}</dd></div>
+      <div><dt>اداره</dt><dd>{{ p.organization|default:"—" }}</dd></div>
+      <div><dt>د پیل نېټه</dt><dd>{% if p.start_date %}{{ p.start_date|date:"Y-m-d"|pd }}{% else %}—{% endif %}</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel"><h2>اضافي معلومات</h2>
+    <dl class="info"><div class="wide"><dt>یادښتونه / سوانح</dt><dd>{{ p.notes|default:"—"|linebreaksbr }}</dd></div></dl>
+  </section>
+
+  <p class="meta">ثبت: {{ p.created_at|date:"Y-m-d H:i"|pd }} — {{ p.created_by.get_username|default:"—" }}{% if p.updated_at and p.updated_by %} · وروستی سمون: {{ p.updated_at|date:"Y-m-d H:i"|pd }} — {{ p.updated_by.get_username }}{% endif %}</p>
+</main>
+{% include "sawanih/_confirm_dialog.html" %}
+{% endblock %}
+{% block js %}<script src="{% static 'sawanih/person_actions.js' %}"></script>{% endblock %}

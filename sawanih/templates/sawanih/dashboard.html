@@ -1,0 +1,49 @@
+{% extends "sawanih/base.html" %}{% load static sawanih_extras %}
+{% block title %}سوانح | کورپاڼه{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'sawanih/pages.css' %}">{% endblock %}
+{% block content %}
+<main>
+  <div class="head">
+    <div><h1>اشخاص</h1><p class="sub">د ټولو ثبت شويو اشخاصو لېست.</p></div>
+    <div class="head-actions">
+      <a class="btn" href="{% url 'sawanih:reports' %}">📊 راپورونه</a>
+      <a class="btn primary" href="{% url 'sawanih:person_new' %}">＋ نوی شخص ثبت کړئ</a>
+    </div>
+  </div>
+
+  <section class="panel" aria-label="د اشخاصو جدول">
+    <form class="toolbar" method="get" role="search">
+      <input type="search" name="q" value="{{ q }}" placeholder="د نوم، تذکرې، تلیفون یا ادارې له مخې لټون..." aria-label="لټون">
+      <button class="btn" type="submit">لټون</button>
+      {% if q %}<a class="btn" href="{% url 'sawanih:dashboard' %}">پاکول</a>{% endif %}
+    </form>
+    <p class="count">ټول: {{ page_obj.paginator.count|pd }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>نوم</th><th>د پلار نوم</th><th>د تذکرې شمېره</th><th>تلیفون</th><th>دنده</th><th>عملیات</th></tr></thead>
+        <tbody>
+          {% for p in page_obj %}
+          <tr>
+            <td><a class="name" href="{% url 'sawanih:person_detail' p.pk %}">{{ p.full_name }}</a></td>
+            <td>{{ p.father_name }}</td>
+            <td>{{ p.id_number }}</td>
+            <td dir="ltr" style="text-align:right">{{ p.phone }}</td>
+            <td>{{ p.job_title|default:"—" }}</td>
+            <td><div class="row-actions">
+              <a class="btn sm" href="{% url 'sawanih:person_detail' p.pk %}">کتل</a>
+              <a class="btn sm" href="{% url 'sawanih:person_edit' p.pk %}">سمول</a>
+              {% if perms.sawanih.delete_person %}<button type="button" class="btn sm danger" data-delete-url="{% url 'sawanih:api_person_item' p.pk %}" data-name="{{ p.full_name }}">ړنګول</button>{% endif %}
+            </div></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="empty">{% if q %}پایله ونه موندل شوه.{% else %}تر اوسه هېڅوک ثبت شوی نه دی. <a href="{% url 'sawanih:person_new' %}">لومړی شخص ثبت کړئ</a>{% endif %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "sawanih/_pager.html" %}
+  </section>
+</main>
+{% include "sawanih/_confirm_dialog.html" %}
+{% endblock %}
+{% block js %}<script src="{% static 'sawanih/person_actions.js' %}"></script>{% endblock %}

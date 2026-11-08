@@ -1,0 +1,65 @@
+{% extends "sawanih/base.html" %}{% load static %}
+{% block title %}{% if person %}د شخص معلومات سمول{% else %}نوی شخص ثبت کړئ{% endif %} | سوانح{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'sawanih/person_form.css' %}">{% endblock %}
+{% block content %}
+<main>
+  <div class="head">
+    <h1>{% if person %}د شخص معلومات سمول{% else %}نوی شخص ثبت کړئ{% endif %}</h1>
+    <a class="back" href="{% if person %}{% url 'sawanih:person_detail' person.pk %}{% else %}{% url 'sawanih:dashboard' %}{% endif %}">بېرته</a>
+  </div>
+
+  <form id="personForm" method="post" enctype="multipart/form-data" novalidate
+        data-mode="{% if person %}edit{% else %}create{% endif %}"
+        action="{% if person %}{% url 'sawanih:api_person_item' person.pk %}{% else %}{% url 'sawanih:api_person_create' %}{% endif %}"
+        data-redirect="{% if person %}{% url 'sawanih:person_detail' person.pk %}{% else %}{% url 'sawanih:dashboard' %}{% endif %}">
+    {% csrf_token %}
+    <div class="summary" id="summary" role="alert" tabindex="-1"></div>
+
+    <fieldset>
+      <legend>شخصي معلومات</legend>
+      <div class="grid">
+        <div class="field" data-name="full_name"><label for="full_name">بشپړ نوم<span class="req">*</span></label><input type="text" id="full_name" name="full_name" value="{{ person.full_name|default_if_none:'' }}" maxlength="150" autocomplete="off"><div class="err"></div></div>
+        <div class="field" data-name="father_name"><label for="father_name">د پلار نوم<span class="req">*</span></label><input type="text" id="father_name" name="father_name" value="{{ person.father_name|default_if_none:'' }}" maxlength="150"><div class="err"></div></div>
+        <div class="field" data-name="grandfather_name"><label for="grandfather_name">د نیکه نوم</label><input type="text" id="grandfather_name" name="grandfather_name" value="{{ person.grandfather_name|default_if_none:'' }}" maxlength="150"><div class="err"></div></div>
+        <div class="field" data-name="date_of_birth"><label for="date_of_birth">د زېږېدو نېټه<span class="req">*</span></label><input type="date" id="date_of_birth" name="date_of_birth" value="{{ person.date_of_birth|date:'Y-m-d' }}"><div class="err"></div></div>
+        <div class="field" data-name="id_number"><label for="id_number">د تذکرې شمېره<span class="req">*</span></label><input type="text" id="id_number" name="id_number" value="{{ person.id_number|default_if_none:'' }}" maxlength="30" inputmode="text" autocomplete="off" dir="ltr" style="text-align:right"><div class="err"></div><div class="hint">هره تذکره یوازې یو ځل ثبتېدلی شي.</div></div>
+        <div class="field" data-name="phone"><label for="phone">تلیفون<span class="req">*</span></label><input type="tel" id="phone" name="phone" value="{{ person.phone|default_if_none:'' }}" maxlength="20" inputmode="tel" dir="ltr" style="text-align:right" placeholder="0700123456"><div class="err"></div></div>
+        <div class="field" data-name="email"><label for="email">بریښنالیک</label><input type="email" id="email" name="email" value="{{ person.email|default_if_none:'' }}" dir="ltr" style="text-align:right"><div class="err"></div></div>
+        <div class="field" data-name="photo"><label for="photo">عکس</label>
+          <div class="photo-row"><div class="preview" id="preview">{% if person.photo %}<img src="{{ person.photo.url }}" alt="">{% else %}<span aria-hidden="true">👤</span>{% endif %}</div><input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp"></div>
+          <div class="err"></div><div class="hint">JPG، PNG یا WEBP — تر 2 MB.{% if person.photo %} نوی عکس وټاکئ ترڅو بدل شي.{% endif %}</div></div>
+        <div class="field wide" data-name="address"><label for="address">پته</label><textarea id="address" name="address" rows="2">{{ person.address }}</textarea><div class="err"></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>تحصیلي معلومات</legend>
+      <div class="grid">
+        <div class="field" data-name="degree"><label for="degree">درجه</label><input type="text" id="degree" name="degree" value="{{ person.degree|default_if_none:'' }}" maxlength="100"><div class="err"></div></div>
+        <div class="field" data-name="institution"><label for="institution">موسسه</label><input type="text" id="institution" name="institution" value="{{ person.institution|default_if_none:'' }}" maxlength="150"><div class="err"></div></div>
+        <div class="field" data-name="graduation_year"><label for="graduation_year">د فراغت کال</label><input type="number" id="graduation_year" name="graduation_year" value="{{ person.graduation_year|default_if_none:'' }}" min="1950" max="2100" inputmode="numeric" dir="ltr" style="text-align:right"><div class="err"></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>دندې او وظیفې معلومات</legend>
+      <div class="grid">
+        <div class="field" data-name="job_title"><label for="job_title">اوسنۍ دنده</label><input type="text" id="job_title" name="job_title" value="{{ person.job_title|default_if_none:'' }}" maxlength="150"><div class="err"></div></div>
+        <div class="field" data-name="organization"><label for="organization">اداره</label><input type="text" id="organization" name="organization" value="{{ person.organization|default_if_none:'' }}" maxlength="150"><div class="err"></div></div>
+        <div class="field" data-name="start_date"><label for="start_date">د پیل نېټه</label><input type="date" id="start_date" name="start_date" value="{{ person.start_date|date:'Y-m-d' }}"><div class="err"></div></div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>اضافي معلومات</legend>
+      <div class="field" data-name="notes"><label for="notes">یادښتونه / سوانح</label><textarea id="notes" name="notes" rows="5">{{ person.notes }}</textarea><div class="err"></div></div>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn save" type="submit" id="saveBtn">{% if person %}بدلونونه خوندي کړئ{% else %}ثبت کړئ{% endif %}</button>
+      <a class="btn cancel" href="{% if person %}{% url 'sawanih:person_detail' person.pk %}{% else %}{% url 'sawanih:dashboard' %}{% endif %}">لغوه</a>
+    </div>
+  </form>
+</main>
+{% endblock %}
+{% block js %}<script src="{% static 'sawanih/person_form.js' %}"></script>{% endblock %}

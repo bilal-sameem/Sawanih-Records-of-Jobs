@@ -1,0 +1,60 @@
+{% extends "sawanih/base.html" %}{% load static sawanih_extras %}
+{% block title %}راپورونه | سوانح{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'sawanih/pages.css' %}">{% endblock %}
+{% block content %}
+<main>
+  <div class="head">
+    <div><h1>راپورونه</h1><p class="sub">د ثبت نېټې یا حالت له مخې اشخاص فلټر کړئ، وګورئ او ډاونلوډ یې کړئ.</p></div>
+    <div class="head-actions no-print">
+      <a class="btn" href="{% url 'sawanih:dashboard' %}">بېرته لېست ته</a>
+      <button type="button" class="btn" onclick="window.print()">چاپ</button>
+      <a class="btn primary" href="{% url 'sawanih:reports_export' %}{% querystring page=None %}">⬇ CSV ډاونلوډ</a>
+    </div>
+  </div>
+
+  <form class="panel no-print" method="get" aria-label="فلټرونه">
+    <div class="filters">
+      <div><label for="date_from">د ثبت له نېټې</label><input type="date" id="date_from" name="date_from" value="{{ f.date_from }}"></div>
+      <div><label for="date_to">تر نېټې</label><input type="date" id="date_to" name="date_to" value="{{ f.date_to }}"></div>
+      <div><label for="status">حالت</label>
+        <select id="status" name="status">
+          <option value="">ټول</option>
+          <option value="complete"{% if f.status == "complete" %} selected{% endif %}>بشپړ</option>
+          <option value="incomplete"{% if f.status == "incomplete" %} selected{% endif %}>نابشپړ</option>
+        </select></div>
+      <div><label for="q">لټون</label><input type="search" id="q" name="q" value="{{ f.q }}" placeholder="نوم، تذکره، تلیفون..." style="max-width:none;width:100%"></div>
+      <div class="filter-actions"><button class="btn primary" style="font-size:13px;padding:10px 18px" type="submit">فلټر</button><a class="btn" href="{% url 'sawanih:reports' %}">پاکول</a></div>
+    </div>
+    <p class="sub" style="margin-top:12px">بشپړ ریکارډ = زده کړې (درجه او موسسه) او دنده (دنده او اداره) دواړه ډک شوي وي.</p>
+  </form>
+
+  <section class="stats" aria-label="لنډیز">
+    <div class="stat"><span>ټول پایلې</span><b>{{ stats.total|pd }}</b></div>
+    <div class="stat"><span>بشپړ ریکارډونه</span><b>{{ stats.complete|pd }}</b></div>
+    <div class="stat"><span>نابشپړ ریکارډونه</span><b>{{ stats.incomplete|pd }}</b></div>
+  </section>
+
+  <section class="panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>نوم</th><th>د پلار نوم</th><th>د تذکرې شمېره</th><th>تلیفون</th><th>دنده</th><th>اداره</th><th>حالت</th><th>د ثبت نېټه</th></tr></thead>
+        <tbody>
+          {% for p in page_obj %}
+          <tr>
+            <td><a class="name" href="{% url 'sawanih:person_detail' p.pk %}">{{ p.full_name }}</a></td>
+            <td>{{ p.father_name }}</td><td>{{ p.id_number }}</td>
+            <td dir="ltr" style="text-align:right">{{ p.phone }}</td>
+            <td>{{ p.job_title|default:"—" }}</td><td>{{ p.organization|default:"—" }}</td>
+            <td><span class="badge {% if p.is_complete %}ok{% else %}warn{% endif %}">{% if p.is_complete %}بشپړ{% else %}نابشپړ{% endif %}</span></td>
+            <td>{{ p.created_at|date:"Y-m-d"|pd }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="empty">د دې فلټر لپاره هېڅ پایله ونه موندل شوه.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "sawanih/_pager.html" %}
+  </section>
+</main>
+{% endblock %}
